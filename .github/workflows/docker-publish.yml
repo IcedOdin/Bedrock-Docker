@@ -47,6 +47,9 @@ jobs:
     needs: test
 
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     if: github.event_name == 'push'
 
     steps:
