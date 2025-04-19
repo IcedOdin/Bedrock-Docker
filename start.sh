@@ -26,7 +26,7 @@ fi
 
 # Start the server in the background and capture its PID
 echo "Starting Minecraft Bedrock server..."
-./bedrock_server > >(tee "$LOGFILE") 2>&1 &
+screen -L -Logfile $LOGFILE -dmS Bedrock ./bedrock_server
 
 # Save PID so Flask can write to server stdin
 echo $! > bedrock_server.pid
