@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  bedrock-server:
+    build: .
+    container_name: bedrock-server
+    ports:
+      - "19132:19132/udp"  # Bedrock default port
+      - "19133:19133/udp"  # Optional second port
+      - "5000:5000"        # Flask API
+    volumes:
+      - bedrock_data:/bedrock
+    restart: unless-stopped
+
+volumes:
+  bedrock_data:
