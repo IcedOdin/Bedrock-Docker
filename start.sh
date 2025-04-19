@@ -24,13 +24,8 @@ if [ ! -f "$DownloadFile" ]; then
     chmod +x bedrock_server
 fi
 
-# Start the server in the background and capture its PID
-echo "Starting Minecraft Bedrock server..."
-screen -L -Logfile $LOGFILE -dmS Bedrock ./bedrock_server
+# Start API in background
+python3 /server_api.py &
 
-# Save PID so Flask can write to server stdin
-echo $! > bedrock_server.pid
-
-# Start the Flask API
-echo "Starting command API on port 5000..."
-exec python3 /server_api.py
+# Run bedrock server in foreground so container stays alive
+exec ./bedrock_server
