@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get install -y curl unzip libcurl4 libssl3 libnss3 libnss3-tools libatomic1 jq python3 python3-pip && \
+    apt-get install -y curl unzip screen libcurl4 libssl3 libnss3 libnss3-tools libatomic1 jq python3 python3-pip && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Flask for the HTTP API
