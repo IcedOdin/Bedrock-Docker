@@ -26,11 +26,10 @@ if [ ! -f "$DownloadFile" ]; then
     chmod +x bedrock_server
 fi
 
-python3 /server_api.py &
+# Start server with logging
+./bedrock_server > >(tee "logs/bedrock_$(date +%Y%m%d_%H%M%S).log") 2>&1 &
+echo $! > bedrock_server.pid
 
-# Add this:
-echo "Trying to start bedrock server..."
-./bedrock_server || echo "Bedrock crashed with status $?"
-
-# Keep container alive to inspect logs
-sleep infinity
+# Start API for sending commands
+echo "Starting Flask API..."
+exec python3 /server_api.py
