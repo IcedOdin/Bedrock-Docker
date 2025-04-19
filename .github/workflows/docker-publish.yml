@@ -48,8 +48,9 @@ jobs:
 
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       issues: write
+      metadata: write
     if: github.event_name == 'push'
 
     steps:
