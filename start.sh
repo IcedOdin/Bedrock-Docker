@@ -24,8 +24,11 @@ if [ ! -f "$DownloadFile" ]; then
     chmod +x bedrock_server
 fi
 
-# Start API in background
 python3 /server_api.py &
 
-# Run bedrock server in foreground so container stays alive
-exec ./bedrock_server
+# Add this:
+echo "Trying to start bedrock server..."
+./bedrock_server || echo "Bedrock crashed with status $?"
+
+# Keep container alive to inspect logs
+sleep infinity
