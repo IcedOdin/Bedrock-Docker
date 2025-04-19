@@ -54,7 +54,7 @@ jobs:
 
       - name: Build image
         run: |
-          cd src
+          
           docker build . --file Dockerfile --tag $IMAGE_NAME
 
       - name: Log into registry
