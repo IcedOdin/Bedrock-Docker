@@ -1,7 +1,27 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template, redirect
 import os
 
 app = Flask(__name__)
+
+SETTINGS_PATH = "/bedrock/server.properties"
+
+def parse_properties(path):
+    props = {}
+    with open(path) as f:
+        for line in f:
+            if line.strip() and not line.startswith('#'):
+                k, v = line.strip().split('=', 1)
+                props[k] = v
+    return props
+
+def write_properties(path, props):
+    with open(path, 'w') as f:
+        for key, val in props.items():
+            f.write(f"{key}={val}\n")
+
+@app.route("/")
+def index():
+    return "Flask API is running!"
 
 @app.route('/health', methods=['GET'])
 def health():
@@ -27,6 +47,21 @@ def get_server_pid():
             return int(f.read().strip())
     except Exception as ex:
         raise Exception("Bedrock server PID not found: " + str(ex))
+
+@app.route("/", methods=["GET", "POST"])
+def settings():
+    if request.method == "POST":
+        new_settings = request.form.to_dict()
+        write_properties(SETTINGS_PATH, new_settings)
+        return redirect("/")
+    settings = parse_properties(SETTINGS_PATH)
+    return render_template("settings.html", settings=settings)
+
+@app.route("/restart", methods=["POST"])
+def restart():
+    os.system("supervisorctl restart bedrock")
+    return "Restarting..."
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=50000)
