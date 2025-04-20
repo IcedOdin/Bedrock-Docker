@@ -2,8 +2,7 @@
 set -e
 
 cd /bedrock
-exec > /bedrock/startup.log 2>&1
-echo "========== Starting Minecraft Bedrock Server =========="
+
 
 # Setup logs
 mkdir -p logs
