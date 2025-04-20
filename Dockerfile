@@ -19,12 +19,12 @@ WORKDIR /bedrock
 VOLUME ["/bedrock"]
 
 # Copy app
-COPY . /app
+#COPY . /app
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
 # Set app working directory
-WORKDIR /app
+#WORKDIR /app
 
 # Expose Bedrock ports
 EXPOSE 19132/udp
