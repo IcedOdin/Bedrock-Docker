@@ -5,6 +5,7 @@ app = Flask(__name__)
 
 SETTINGS_PATH = "/bedrock/server.properties"
 
+
 def parse_properties(path):
     props = {}
     with open(path) as f:
@@ -14,20 +15,19 @@ def parse_properties(path):
                 props[k] = v
     return props
 
+
 def write_properties(path, props):
     with open(path, 'w') as f:
         for key, val in props.items():
             f.write(f"{key}={val}\n")
 
-@app.route("/")
-def index():
-    return "Flask API is running!"
 
-@app.route('/health', methods=['GET'])
+@app.route("/health", methods=["GET"])
 def health():
     return jsonify(status="ok"), 200
 
-@app.route('/command', methods=['POST'])
+
+@app.route("/command", methods=["POST"])
 def send_command():
     data = request.get_json()
     if not data or 'command' not in data:
@@ -35,11 +35,12 @@ def send_command():
 
     command = data['command']
     try:
-        with open('/proc/{}/fd/0'.format(get_server_pid()), 'w') as stdin:
+        with open(f'/proc/{get_server_pid()}/fd/0', 'w') as stdin:
             stdin.write(command + '\n')
         return jsonify({'status': 'Command sent', 'command': command})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 def get_server_pid():
     try:
@@ -47,6 +48,7 @@ def get_server_pid():
             return int(f.read().strip())
     except Exception as ex:
         raise Exception("Bedrock server PID not found: " + str(ex))
+
 
 @app.route("/", methods=["GET", "POST"])
 def settings():
@@ -57,13 +59,13 @@ def settings():
     settings = parse_properties(SETTINGS_PATH)
     return render_template("settings.html", settings=settings)
 
+
 @app.route("/restart", methods=["POST"])
 def restart():
     os.system("supervisorctl restart bedrock")
     return "Restarting..."
 
 
-#if __name__ == '__main__':
-    #app.run(host='0.0.0.0', port=50000)
+# DO NOT include app.run() here.
+# Gunicorn will handle running the app.
 
-app.run(host='0.0.0.0', port=50000)
