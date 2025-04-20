@@ -25,7 +25,8 @@ if [ ! -f "$DownloadFile" ]; then
     chmod +x bedrock_server
 fi
 
-python3 /server_api.py &
+# Start Minecraft Bedrock server in background
+/bedrock/bedrock_server > /bedrock/logs/server.log 2>&1 &
 
-#echo "Starting bedrock server..."
-#exec ./bedrock_server
+# Start Flask API with Gunicorn (4 workers, port 5000)
+exec gunicorn -w 4 -b 0.0.0.0:50000 server_api:app
