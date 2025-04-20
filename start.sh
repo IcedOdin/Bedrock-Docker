@@ -25,10 +25,7 @@ if [ ! -f "$DownloadFile" ]; then
     chmod +x bedrock_server
 fi
 
-# Start server with logging
-./bedrock_server > >(tee "logs/bedrock_$(date +%Y%m%d_%H%M%S).log") 2>&1 &
-echo $! > bedrock_server.pid
+python3 /server_api.py &
 
-# Start API for sending commands
-echo "Starting Flask API..."
-exec python3 /server_api.py
+echo "Starting bedrock server..."
+exec ./bedrock_server
