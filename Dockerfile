@@ -24,7 +24,7 @@ VOLUME ["/bedrock"]
 EXPOSE 19132/udp
 EXPOSE 19133/udp
 # Flask API
-EXPOSE 5000/tcp  
+EXPOSE 50000/tcp  
 
 CMD ["/start.sh"]
 
