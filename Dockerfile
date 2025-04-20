@@ -19,7 +19,7 @@ WORKDIR /bedrock
 VOLUME ["/bedrock"]
 
 # Copy app
-#COPY . /app
+COPY . /app
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
