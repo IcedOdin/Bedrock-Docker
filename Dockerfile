@@ -20,9 +20,7 @@ VOLUME ["/bedrock"]
 
 # Copy app
 #COPY . /app
-COPY static /static
-COPY templates /templates
-COPY main.py /main.py
+COPY main.py bedrock/app/
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
@@ -38,4 +36,4 @@ EXPOSE 50000
 
 # Start script
 #CMD ["/start.sh"]
-ENTRYPOINT ["./start.sh"]
+ENTRYPOINT ["/start.sh"]
