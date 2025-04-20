@@ -20,7 +20,7 @@ VOLUME ["/bedrock"]
 
 # Copy app
 #COPY . /app
-COPY main.py bedrock/app/
+COPY main.py /main.py
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
