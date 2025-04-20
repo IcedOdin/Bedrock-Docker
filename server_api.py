@@ -3,6 +3,10 @@ import os
 
 app = Flask(__name__)
 
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify(status="ok"), 200
+
 @app.route('/command', methods=['POST'])
 def send_command():
     data = request.get_json()
@@ -21,8 +25,9 @@ def get_server_pid():
     try:
         with open("/bedrock/bedrock_server.pid") as f:
             return int(f.read().strip())
-    except:
-        raise Exception("Bedrock server PID not found")
+    except Exception as ex:
+        raise Exception("Bedrock server PID not found: " + str(ex))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=50000)
+    app.run(host='0.0.0.0', port=5000)
+
