@@ -30,4 +30,4 @@ fi
 echo "Bedrock Server is running....."
 
 # Start Flask API with Gunicorn (4 workers, port 5000)
-exec gunicorn --chdir app main:app -w 2 -b 0.0.0.0:50000 
+exec gunicorn -w 2 -b 0.0.0.0:50000 'main:app'
