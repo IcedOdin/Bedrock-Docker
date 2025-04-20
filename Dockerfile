@@ -17,6 +17,8 @@ WORKDIR /bedrock
 # Copy scripts
 COPY start.sh /start.sh
 COPY . /app
+COPY templates /app/templates
+COPY static /app/static
 WORKDIR /app
 RUN chmod +x /start.sh
 
