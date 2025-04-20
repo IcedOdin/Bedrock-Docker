@@ -16,7 +16,8 @@ WORKDIR /bedrock
 
 # Copy scripts
 COPY start.sh /start.sh
-COPY server_api.py /server_api.py
+COPY . /app
+WORKDIR /app
 RUN chmod +x /start.sh
 
 # Volume for data persistence
