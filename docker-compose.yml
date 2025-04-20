@@ -7,12 +7,12 @@ services:
     ports:
       - "19132:19132/udp"  # Bedrock default port
       - "19133:19133/udp"  # Optional second port
-      - "5000:5000"        # Flask API
+      - "50000:50000"        # Flask API
     volumes:
       - bedrock_data:/bedrock
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      test: ["CMD", "curl", "-f", "http://localhost:50000/"]
       interval: 30s
       timeout: 10s
       retries: 5
