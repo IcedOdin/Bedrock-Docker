@@ -27,5 +27,5 @@ fi
 
 python3 /server_api.py &
 
-echo "Starting bedrock server..."
-exec ./bedrock_server
+#echo "Starting bedrock server..."
+#exec ./bedrock_server
