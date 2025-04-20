@@ -4,32 +4,34 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get install -y curl unzip screen libcurl4 libssl3 libnss3 libnss3-tools libatomic1 jq python3 python3-pip && \
+    apt-get install -y \
+        curl unzip screen libcurl4 libssl3 libnss3 libnss3-tools \
+        libatomic1 jq python3 python3-pip && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Flask for the HTTP API
-RUN pip3 install flask
-RUN pip install gunicorn
+# Install Python packages
+RUN pip3 install --no-cache-dir flask gunicorn
 
-# Create working directory
+# Create working directory for Bedrock server
 WORKDIR /bedrock
 
-# Copy scripts
-COPY start.sh /start.sh
-COPY . /app
-COPY server_api.py /app
-COPY templates /app/templates
-COPY static /app/static
-WORKDIR /app
-RUN chmod +x /start.sh
-
-# Volume for data persistence
+# Volume for persistent data
 VOLUME ["/bedrock"]
 
+# Copy app
+COPY . /app
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Set app working directory
+WORKDIR /app
+
+# Expose Bedrock ports
 EXPOSE 19132/udp
 EXPOSE 19133/udp
-# Flask API
-EXPOSE 50000  
 
+# Expose Flask API port
+EXPOSE 50000
+
+# Start script
 CMD ["/start.sh"]
-
