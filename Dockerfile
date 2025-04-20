@@ -20,6 +20,9 @@ VOLUME ["/bedrock"]
 
 # Copy app
 #COPY . /app
+COPY /static /app/static
+COPY /templates /app/templates
+COPY main.py /app/main.py
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
