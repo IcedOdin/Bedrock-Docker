@@ -29,4 +29,4 @@ fi
 /bedrock/bedrock_server > /bedrock/logs/server.log 2>&1 &
 
 # Start Flask API with Gunicorn (4 workers, port 5000)
-exec gunicorn -w 4 -b 0.0.0.0:50000 server_api:app
+exec gunicorn -w 4 -b 0.0.0.0:50000 server-api:app
