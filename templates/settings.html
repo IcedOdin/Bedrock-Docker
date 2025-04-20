@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Minecraft Server Settings</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; background: #eee; }
+    input, select { width: 100%; margin: 0.3em 0; }
+    form { background: white; padding: 1em; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Bedrock Server Settings</h2>
+  <form method="post">
+    {% for key, value in settings.items() %}
+      <label>{{ key }}:</label>
+      <input name="{{ key }}" value="{{ value }}">
+    {% endfor %}
+    <br>
+    <button type="submit">Save Settings</button>
+  </form>
+  <form method="post" action="/restart" style="margin-top: 1em;">
+    <button type="submit">Restart Server</button>
+  </form>
+</body>
+</html>
