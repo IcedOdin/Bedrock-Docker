@@ -37,4 +37,5 @@ EXPOSE 19133/udp
 EXPOSE 50000
 
 # Start script
-CMD ["/start.sh"]
+#CMD ["/start.sh"]
+ENTRYPOINT ["./start.sh"]
