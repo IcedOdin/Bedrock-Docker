@@ -6,3 +6,5 @@ Docker image of bedrock server for use on TrueNas
  UDP 19132
  UDP 19133
  TCP 50000
+
+### Version 0.4.20 Stable
