@@ -1,25 +1,40 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Minecraft Server Settings</title>
-  <style>
-    body { font-family: sans-serif; padding: 2em; background: #eee; }
-    input, select { width: 100%; margin: 0.3em 0; }
-    form { background: white; padding: 1em; border-radius: 10px; }
-  </style>
-</head>
-<body>
-  <h2>Bedrock Server Settings</h2>
-  <form method="post">
-    {% for key, value in settings.items() %}
-      <label>{{ key }}:</label>
-      <input name="{{ key }}" value="{{ value }}">
-    {% endfor %}
-    <br>
-    <button type="submit">Save Settings</button>
-  </form>
-  <form method="post" action="/restart" style="margin-top: 1em;">
-    <button type="submit">Restart Server</button>
-  </form>
-</body>
-</html>
+{% extends "layout.html" %}
+
+{% block title %}Server Settings{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-lg-8">
+      <form method="post" class="card p-4 mb-4">
+        <h2 class="mb-3">⚙️ Server Settings</h2>
+        <div class="row g-3">
+          {% for key, value in settings.items() %}
+            <div class="col-md-6">
+              <label for="{{ key }}">{{ key }}</label>
+              <input type="text" class="form-control" id="{{ key }}" name="{{ key }}" value="{{ value }}">
+            </div>
+          {% endfor %}
+        </div>
+        <div class="mt-4">
+          <button type="submit" class="btn btn-success">💾 Save</button>
+          <button type="button" class="btn btn-warning" onclick="restartServer()">🔁 Restart</button>
+        </div>
+        <div id="restart-status" class="mt-3"></div>
+      </form>
+    </div>
+    <div class="col-lg-4">
+      <div class="card p-3 mb-4">
+        <h4>🖥️ Live Server Info</h4>
+        <p>Status: <span id="server-status">Checking...</span></p>
+        <p>Version: <span id="server-version">–</span></p>
+        <p>Players Online: <span id="player-count">–</span></p>
+      </div>
+      <div class="card p-3">
+        <h4>💬 Send Command</h4>
+        <input type="text" id="command-input" class="form-control mb-2" placeholder="Type a command">
+        <button class="btn btn-primary w-100" onclick="sendCommand()">▶️ Send</button>
+        <div id="command-response" class="mt-3 text-muted small"></div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
