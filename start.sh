@@ -26,8 +26,10 @@ if [ ! -f "$DownloadFile" ]; then
 fi
 
 # Start Minecraft Bedrock server in background
-/bedrock/bedrock_server > /bedrock/logs/server.log 2>&1 &
+/bedrock/bedrock_server > /bedrock/logs/latest.log 2>&1 &
 echo "Bedrock Server is running....."
+# Save its PID so Flask can find it
+echo $! > /bedrock/bedrock_server.pid
 # Creating Files the Hard Way
 echo "Creating app files......"
 mkdir -p static
