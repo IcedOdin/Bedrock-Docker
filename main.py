@@ -65,7 +65,30 @@ def restart():
     os.system("supervisorctl restart bedrock")
     return "Restarting..."
 
+@app.route('/status', methods=['GET'])
+def status():
+    status = {
+        "running": False,
+        "version": None,
+        "players": None
+    }
+
+    try:
+        with open("/bedrock/logs/latest.log", "r") as f:
+            lines = f.readlines()
+            for line in reversed(lines):
+                if "Server started" in line:
+                    status["running"] = True
+                if "Version:" in line and not status["version"]:
+                    status["version"] = line.split("Version:")[-1].strip()
+                if "Player connected" in line or "Player disconnected" in line:
+                    status["players"] = "Check console/logs"  # Placeholder
+    except FileNotFoundError:
+        status["error"] = "Log not found"
+
+    return jsonify(status)
+
+
 
 # DO NOT include app.run() here.
 # Gunicorn will handle running the app.
-
