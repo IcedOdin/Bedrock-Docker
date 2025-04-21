@@ -32,32 +32,115 @@ echo "Bedrock Server is running....."
 echo "Creating app files......"
 mkdir -p static
 mkdir -p templates
-cat << END > templates/settings.html
+cat << END > static/custom.js
+function restartServer() {
+  fetch('/restart', { method: 'POST' })
+    .then(r => r.text())
+    .then(msg => {
+      document.getElementById('restart-status').innerHTML = `
+        <div class="alert alert-info">${msg}</div>
+      `;
+    });
+}
+
+function sendCommand() {
+  const cmd = document.getElementById('command-input').value;
+  fetch('/command', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ command: cmd })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('command-response').innerText = JSON.stringify(data, null, 2);
+  });
+}
+
+// Later: Add fetch('/status') here to update live server info
+function updateStatus() {
+  fetch('/status')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('server-status').innerText = data.running ? '🟢 Online' : '🔴 Offline';
+      document.getElementById('server-version').innerText = data.version || '–';
+      document.getElementById('player-count').innerText = data.players || '–';
+    });
+}
+
+setInterval(updateStatus, 5000); // update every 5s
+updateStatus(); // initial load
+END
+
+cat << END > templates/layout.html
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Minecraft Server Settings</title>
+  <meta charset="UTF-8">
+  <title>{% block title %}Bedrock Server UI{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; padding: 2em; background: #eee; }
-    input, select { width: 100%; margin: 0.3em 0; }
-    form { background: white; padding: 1em; border-radius: 10px; }
+    body { background-color: #121212; color: white; }
+    .card { background-color: #1e1e1e; }
+    label { text-transform: capitalize; }
   </style>
 </head>
 <body>
-  <h2>Bedrock Server Settings</h2>
-  <form method="post">
-    {% for key, value in settings.items() %}
-      <label>{{ key }}:</label>
-      <input name="{{ key }}" value="{{ value }}">
-    {% endfor %}
-    <br>
-    <button type="submit">Save Settings</button>
-  </form>
-  <form method="post" action="/restart" style="margin-top: 1em;">
-    <button type="submit">Restart Server</button>
-  </form>
+  <nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="/">🛠️ Bedrock Control Panel</a>
+    </div>
+  </nav>
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/custom.js"></script>
 </body>
 </html>
+END
+
+cat << END > templates/settings.html
+{% extends "layout.html" %}
+
+{% block title %}Server Settings{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-lg-8">
+      <form method="post" class="card p-4 mb-4">
+        <h2 class="mb-3">⚙️ Server Settings</h2>
+        <div class="row g-3">
+          {% for key, value in settings.items() %}
+            <div class="col-md-6">
+              <label for="{{ key }}">{{ key }}</label>
+              <input type="text" class="form-control" id="{{ key }}" name="{{ key }}" value="{{ value }}">
+            </div>
+          {% endfor %}
+        </div>
+        <div class="mt-4">
+          <button type="submit" class="btn btn-success">💾 Save</button>
+          <button type="button" class="btn btn-warning" onclick="restartServer()">🔁 Restart</button>
+        </div>
+        <div id="restart-status" class="mt-3"></div>
+      </form>
+    </div>
+    <div class="col-lg-4">
+      <div class="card p-3 mb-4">
+        <h4>🖥️ Live Server Info</h4>
+        <p>Status: <span id="server-status">Checking...</span></p>
+        <p>Version: <span id="server-version">–</span></p>
+        <p>Players Online: <span id="player-count">–</span></p>
+      </div>
+      <div class="card p-3">
+        <h4>💬 Send Command</h4>
+        <input type="text" id="command-input" class="form-control mb-2" placeholder="Type a command">
+        <button class="btn btn-primary w-100" onclick="sendCommand()">▶️ Send</button>
+        <div id="command-response" class="mt-3 text-muted small"></div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
 END
 
 cat << END > main.py
@@ -127,6 +210,30 @@ def settings():
 def restart():
     os.system("supervisorctl restart bedrock")
     return "Restarting..."
+
+@app.route('/status', methods=['GET'])
+def status():
+    status = {
+        "running": False,
+        "version": None,
+        "players": None
+    }
+
+    try:
+        with open("/bedrock/logs/latest.log", "r") as f:
+            lines = f.readlines()
+            for line in reversed(lines):
+                if "Server started" in line:
+                    status["running"] = True
+                if "Version:" in line and not status["version"]:
+                    status["version"] = line.split("Version:")[-1].strip()
+                if "Player connected" in line or "Player disconnected" in line:
+                    status["players"] = "Check console/logs"  # Placeholder
+    except FileNotFoundError:
+        status["error"] = "Log not found"
+
+    return jsonify(status)
+
 
 
 # DO NOT include app.run() here.
