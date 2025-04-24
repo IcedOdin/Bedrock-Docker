@@ -6,7 +6,12 @@ cd /bedrock
 
 # Setup logs
 mkdir -p logs
-LOGFILE="logs/bedrock_$(date +%Y%m%d_%H%M%S).log"
+PIPE_PATH="/bedrock/server_input"
+
+# Avoid "file exists" error
+if [[ ! -p "$PIPE_PATH" ]]; then
+    mkfifo "$PIPE_PATH"
+fi
 
 mkdir -p downloads
 # Download latest Bedrock server if not present
@@ -25,21 +30,29 @@ if [ ! -f "$DownloadFile" ]; then
     chmod +x bedrock_server
 fi
 
-# Start Minecraft Bedrock server in background
-/bedrock/bedrock_server > /bedrock/logs/latest.log 2>&1 &
-echo "Bedrock Server is running....."
-# Save its PID so Flask can find it
-echo $! > /bedrock/bedrock_server.pid
+# Start Bedrock server
+echo "Starting Bedrock server..."
+# Keep the pipe open with a background tail that never exits
+tail -f "$PIPE_PATH" | ./bedrock_server > /bedrock/logs/latest.log 2>&1 &
+BEDROCK_PID=$!
+echo "$BEDROCK_PID" > /bedrock/bedrock_server.pid
 # Creating Files the Hard Way
 echo "Creating app files......"
 mkdir -p static
 mkdir -p templates
 cd ../
-cp main.py /bedrock/main.py
-cp custom.js /bedrock/static/custom.js
-cp settings.html /bedrock/templates/settings.html
-cp layout.html /bedrock/templates/layout.html
+cp main.py /bedrock/
+cp custom.js /bedrock/static/
+cp console.html settings.html layout.html /bedrock/templates/
 cd bedrock/
 
-# Start Flask API with Gunicorn (4 workers, port 5000)
-exec gunicorn -w 2 -b 0.0.0.0:50000 'main:app'
+# Start the Flask API with Gunicorn in the background
+echo "Starting Flask API with Gunicorn..."
+gunicorn --bind 0.0.0.0:50000 'main:app' > /bedrock/logs/api.log 2>&1 &
+
+# Wait and confirm services
+sleep 5
+echo "Bedrock server and API should now be running."
+
+# Keep container alive and stream logs
+tail -f /bedrock/logs/latest.log

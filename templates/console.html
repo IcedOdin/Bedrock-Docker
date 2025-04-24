@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}Server Console{% endblock %}
+
+{% block content %}
+  <div class="cmd-box">
+      <h1>Send a Command</h1>
+      <form method="POST">
+        <label for="command">Select a Command:</label>
+        <select type="text" name="base_command" id="command">
+          {% for cmd in commands %}
+            <option value="{{ cmd }}">{{ cmd }}</option>
+          {% endfor %}
+        </select>
+        <label for="args">Arguments:</label>
+        <input type="text" name="args" id="args" placeholder="Optional arguments...">
+        <button type="submit">Send Command</button>
+      </form>
+      {% if status %}
+        <div class="status">{{ status }}</div>
+      {% endif %}
+    </div>
+{% endblock %}
+

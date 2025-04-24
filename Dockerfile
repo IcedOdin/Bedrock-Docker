@@ -21,6 +21,7 @@ VOLUME ["/bedrock"]
 # Copy app
 #COPY . /app
 COPY main.py /main.py
+COPY /templates/console.html /console.html
 COPY /templates/settings.html /settings.html
 COPY /templates/layout.html /layout.html
 COPY /static/custom.js /custom.js
