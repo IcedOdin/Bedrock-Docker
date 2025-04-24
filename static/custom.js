@@ -9,17 +9,24 @@ function restartServer() {
 }
 
 function sendCommand() {
-  const cmd = document.getElementById('command-input').value;
-  fetch('/command', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ command: cmd })
-  })
-  .then(r => r.json())
-  .then(data => {
-    document.getElementById('command-response').innerText = JSON.stringify(data, null, 2);
-  });
-}
+    const baseCommand = document.getElementById("command-select").value;
+    const args = document.getElementById("command-args").value;
+    const fullCommand = `${baseCommand} ${args}`.trim();
+
+    fetch("/command", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: fullCommand })
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("command-response").textContent = JSON.stringify(data);
+    })
+    .catch(err => {
+      document.getElementById("command-response").textContent = "Error sending command.";
+      console.error(err);
+    });
+  }
 
 // Later: Add fetch('/status') here to update live server info
 function updateStatus() {
@@ -34,3 +41,26 @@ function updateStatus() {
 
 setInterval(updateStatus, 5000); // update every 5s
 updateStatus(); // initial load
+
+function updatePlayers() {
+  fetch('/players')
+    .then(res => res.json())
+    .then(data => {
+      const listEl = document.getElementById('player-list');
+      listEl.innerHTML = '';
+      if (data.players && data.players.length) {
+        data.players.forEach(player => {
+          const li = document.createElement('li');
+          li.textContent = player;
+          listEl.appendChild(li);
+        });
+      } else {
+        const li = document.createElement('li');
+        li.textContent = "No players online";
+        listEl.appendChild(li);
+      }
+    });
+}
+
+setInterval(updatePlayers, 5000);
+updatePlayers();
