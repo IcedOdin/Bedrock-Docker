@@ -97,18 +97,27 @@ def status():
     status = {
         "running": False,
         "version": None,
-        "players": None
+        "players": []
     }
     try:
         with open(LOG_PATH, "r") as f:
             lines = f.readlines()
             for line in reversed(lines):
-                if "Server started" in line:
+                clean_line = line.strip()
+                
+                if "Server started" in clean_line:
                     status["running"] = True
-                if "Version:" in line and not status["version"]:
+                
+                if "Version:" in clean_line and not status["version"]:
                     status["version"] = line.split("Version:")[-1].strip()
-                if "Player connected" in line or "Player disconnected" in line:
-                    status["players"] = "Check console/logs"
+                
+                if "There are" in clean_line and "players online" in clean_line:
+                    cleaned = clean_line.split("INFO]")[-1].strip()
+                    if ":" in cleaned:
+                        _, player_data = cleaned.split("players online:", 1)
+                        players = [p.strip() for p in player_data.split(",") if p.strip()]
+                        status["players"] = players
+                        
     except FileNotFoundError:
         status["error"] = "Log not found"
     return jsonify(status)
@@ -120,17 +129,19 @@ def get_players():
         with open('/bedrock/server_input', 'w') as f:
             f.write('list\n')
 
-        time.sleep(1.5)  # Give the server time to process
+        time.sleep(2.5)  # Give the server time to process
 
         players = []
-        with open("/bedrock/logs/latest.log", "r") as f:
+        with open(LOG_PATH, "r") as f:
             lines = f.readlines()
             for line in reversed(lines):
-                if "There are" in line and "players online:" in line:
+                clean_line = line.strip()
+                if "There are" in clean_line and "players online:" in clean_line:
+                    cleaned = clean_line.split("INFO]")[-1].strip()
                     # Example: There are 2/20 players online: Steve, Alex
-                    parts = line.strip().split(":")
-                    if len(parts) > 1:
-                        players = [p.strip() for p in parts[1].split(",") if p.strip()]
+                    if ":" in cleaned:
+                        _, player_data = cleaned.split("players online:", 1)
+                        players = [p.strip() for p in player_data.split(",") if p.strip()]
                     break
         return jsonify(players=players)
     except Exception as e:
