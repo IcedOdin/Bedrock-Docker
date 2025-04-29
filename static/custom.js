@@ -35,7 +35,7 @@ function updateStatus() {
     .then(data => {
       document.getElementById('server-status').innerText = data.running ? '🟢 Online' : '🔴 Offline';
       document.getElementById('server-version').innerText = data.version || '–';
-      document.getElementById('player-count').innerText = data.pcount || '-';
+      document.getElementById('player-count').innerText = data.player_count || '-';
     });
 }
 
@@ -43,7 +43,7 @@ setInterval(updateStatus, 5000); // update every 5s
 updateStatus(); // initial load
 
 function updatePlayers() {
-  fetch('/players')
+  fetch('/status')
     .then(res => res.json())
     .then(data => {
       const listEl = document.getElementById('player-list');

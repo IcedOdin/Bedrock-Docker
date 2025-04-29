@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template, redirect
 import os
 import time
+import re
 
 app = Flask(__name__)
 
@@ -92,63 +93,49 @@ def restart():
         status = f"Error: {e}"
     return "Restarting..."
 
-@app.route("/status")
+@app.route('/status', methods=['GET'])
 def status():
     status = {
         "running": False,
         "version": None,
-        "pcount": None
+        "players": [],
+        "player_count": "0/0"
     }
+
     try:
         with open(LOG_PATH, "r") as f:
             lines = f.readlines()
-            for line in reversed(lines):
-                clean_line = line.strip()
-                
-                if "Server started" in clean_line:
-                    status["running"] = True
-                
-                if "Version:" in clean_line and not status["version"]:
+            for i in range(len(lines) - 1, -1, -1):
+                line = lines[i].strip()
+
+                # Check for version info
+                if "Version:" in line and not status["version"]:
                     status["version"] = line.split("Version:")[-1].strip()
-                
-                if "There are" in clean_line and "players online" in clean_line:
-                    cleaned = clean_line.split("INFO]")[-1].strip()
-                    if ":" in cleaned:
-                        _, player_data = cleaned.split("players online:", 1)
-                        players = [p.strip() for p in player_data.split(",") if p.strip()]
-                        status["pcount"] = str(len(players))
-    
+
+                # Check for running status
+                if "Server started" in line:
+                    status["running"] = True
+
+                # Match player count line
+                match = re.search(r"There are (\d+)/(\d+) players online", line)
+                if match:
+                    count = match.group(1)
+                    max_count = match.group(2)
+                    status["player_count"] = f"{count}/{max_count}"
+
+                    # Check next line for player names
+                    next_line = lines[i + 1].strip() if i + 1 < len(lines) else ""
+                    if next_line and "[INFO]" not in next_line and "There are" not in next_line:
+                        players = next_line.replace(",", "").split()
+                        status["players"] = players
+                    break
+
     except FileNotFoundError:
         status["error"] = "Log not found"
+
     return jsonify(status)
 
-@app.route('/players', methods=['GET'])
-def get_players():
-    try:
-        # Clear a temp log or marker if needed
-        with open('/bedrock/server_input', 'w') as f:
-            f.write('list\n')
 
-        time.sleep(2.5)  # Give the server time to process
-
-        players = {}
-        with open(LOG_PATH, "r") as f:
-            lines = f.readlines()
-            for line in reversed(lines):
-                clean_line = line.strip()
-                if "There are" in clean_line and "players online:" in clean_line:
-                    cleaned = clean_line.split("INFO]")[-1].strip()
-                    # Example: There are 2/20 players online: Steve, Alex
-                    raw_data = cleaned
-                    if ":" in cleaned:
-                        _, player_data = cleaned.split("players online:", 1)
-                        raw_data2 = player_data
-                        players = [p.strip() for p in player_data.split(",") if p.strip()]
-                    
-                    break
-        return jsonify(players=players,raw_data=raw_data,raw_data2=raw_data2)
-    except Exception as e:
-        return jsonify(error=str(e)), 500
 
 
 # DO NOT include app.run() here.
