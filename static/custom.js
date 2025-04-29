@@ -35,7 +35,7 @@ function updateStatus() {
     .then(data => {
       document.getElementById('server-status').innerText = data.running ? '🟢 Online' : '🔴 Offline';
       document.getElementById('server-version').innerText = data.version || '–';
-      document.getElementById('player-count').innerText = data.players || '–';
+      document.getElementById('player-count').innerText = data.pcount || '-';
     });
 }
 

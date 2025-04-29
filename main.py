@@ -97,7 +97,7 @@ def status():
     status = {
         "running": False,
         "version": None,
-        "players": []
+        "pcount": None
     }
     try:
         with open(LOG_PATH, "r") as f:
@@ -116,8 +116,8 @@ def status():
                     if ":" in cleaned:
                         _, player_data = cleaned.split("players online:", 1)
                         players = [p.strip() for p in player_data.split(",") if p.strip()]
-                        status["players"] = players
-                        
+                        status["pcount"] = str(len(players))
+    
     except FileNotFoundError:
         status["error"] = "Log not found"
     return jsonify(status)
@@ -131,7 +131,7 @@ def get_players():
 
         time.sleep(2.5)  # Give the server time to process
 
-        players = []
+        players = {}
         with open(LOG_PATH, "r") as f:
             lines = f.readlines()
             for line in reversed(lines):
@@ -139,11 +139,14 @@ def get_players():
                 if "There are" in clean_line and "players online:" in clean_line:
                     cleaned = clean_line.split("INFO]")[-1].strip()
                     # Example: There are 2/20 players online: Steve, Alex
+                    raw_data = cleaned
                     if ":" in cleaned:
                         _, player_data = cleaned.split("players online:", 1)
+                        raw_data2 = player_data
                         players = [p.strip() for p in player_data.split(",") if p.strip()]
+                    
                     break
-        return jsonify(players=players)
+        return jsonify(players=players,raw_data=raw_data,raw_data2=raw_data2)
     except Exception as e:
         return jsonify(error=str(e)), 500
 
