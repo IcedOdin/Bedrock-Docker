@@ -6,7 +6,7 @@
   <div class="row">
     <div class="col-lg-8">
       <form method="post" class="card p-4 mb-4">
-        <h2 class="mb-3">⚙️ Server Settings</h2>
+        <h2 class="minecraft-style">⚙️ Server Settings</h2>
         <div class="row g-3">
           {% for key, value in settings.items() %}
             <div class="col-md-6">
@@ -27,10 +27,13 @@
         <h4>🖥️ Live Server Info</h4>
         <p>Status: <span id="server-status">Checking...</span></p>
         <p>Version: <span id="server-version">–</span></p>
-        <p>Players Online: <span id="player-count">–</span></p>
-        <p>Online Players List:</p>
-        <ul id="player-list" class="small"></ul>
       </div>
+      <div id="player-status" class="status-box">
+        <h2>🧑‍🌾 Players Online: <span id="player-count">?</span></h2>
+        <ul id="player-list" class="player-list">
+          <li>Loading...</li>
+        </ul>
+      </div>   
       <div class="card p-3">
         <h4>💬 Send Command</h4>
         <form id="command-form" onsubmit="sendCommand(); return false;">

@@ -35,32 +35,34 @@ function updateStatus() {
     .then(data => {
       document.getElementById('server-status').innerText = data.running ? '🟢 Online' : '🔴 Offline';
       document.getElementById('server-version').innerText = data.version || '–';
-      document.getElementById('player-count').innerText = data.player_count || '-';
-    });
-}
+      document.getElementById('player-count').textContent = data.player_count || "0/0";
 
-setInterval(updateStatus, 5000); // update every 5s
-updateStatus(); // initial load
+      const listElement = document.getElementById('player-list');
+      listElement.innerHTML = '';
 
-function updatePlayers() {
-  fetch('/status')
-    .then(res => res.json())
-    .then(data => {
-      const listEl = document.getElementById('player-list');
-      listEl.innerHTML = '';
-      if (data.players && data.players.length) {
+      if (data.players && data.players.length > 0) {
         data.players.forEach(player => {
           const li = document.createElement('li');
           li.textContent = player;
-          listEl.appendChild(li);
+          listElement.appendChild(li);
         });
       } else {
         const li = document.createElement('li');
-        li.textContent = "No players online";
-        listEl.appendChild(li);
+        li.textContent = 'No players online.';
+        listElement.appendChild(li);
       }
+    })
+    .catch(err => {
+      document.getElementById('player-count').textContent = "?/?";
+      const listElement = document.getElementById('player-list');
+      listElement.innerHTML = '<li>Error fetching status.</li>';
+      console.error("Failed to fetch status:", err);
     });
 }
 
-setInterval(updatePlayers, 5000);
-updatePlayers();
+// Update every 10 seconds
+setInterval(updateStatus, 10000); //update every 10seconds
+updateStatus(); // initial call      
+
+
+

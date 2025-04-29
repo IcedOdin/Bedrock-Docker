@@ -95,47 +95,52 @@ def restart():
 
 @app.route('/status', methods=['GET'])
 def status():
-    status = {
-        "running": False,
-        "version": None,
+
+    result = {
+        "player_count": "0/0",
         "players": [],
-        "player_count": "0/0"
+        "running": False,
+        "version": None
     }
 
     try:
         with open(LOG_PATH, "r") as f:
             lines = f.readlines()
-            for i in range(len(lines) - 1, -1, -1):
-                line = lines[i].strip()
 
-                # Check for version info
-                if "Version:" in line and not status["version"]:
-                    status["version"] = line.split("Version:")[-1].strip()
+        # Reverse lines to get latest entries first
+        lines = lines[::-1]
 
-                # Check for running status
-                if "Server started" in line:
-                    status["running"] = True
+        found_players = False
 
-                # Match player count line
+        for i, line in enumerate(lines):
+            # Detect server started
+            if not result["running"] and "Server started" in line:
+                result["running"] = True
+
+            # Detect version
+            if not result["version"]:
+                version_match = re.search(r"Version:\s*([\d\.]+)", line)
+                if version_match:
+                    result["version"] = version_match.group(1)
+
+            # Detect player count
+            if "There are" in line and "players online" in line:
                 match = re.search(r"There are (\d+)/(\d+) players online", line)
                 if match:
-                    count = match.group(1)
-                    max_count = match.group(2)
-                    status["player_count"] = f"{count}/{max_count}"
+                    result["player_count"] = f"{match.group(1)}/{match.group(2)}"
 
-                    # Check next line for player names
-                    next_line = lines[i + 1].strip() if i + 1 < len(lines) else ""
-                    if next_line and "[INFO]" not in next_line and "There are" not in next_line:
-                        players = next_line.replace(",", "").split()
-                        status["players"] = players
+                    # Check next line for player names, if any
+                    if i > 0:
+                        next_line = lines[i - 1].strip()
+                        if next_line and not next_line.startswith("["):
+                            result["players"] = [name.strip() for name in next_line.split(",")]
+                    found_players = True
                     break
 
-    except FileNotFoundError:
-        status["error"] = "Log not found"
+    except Exception as e:
+        result["error"] = f"Log read failed: {e}"
 
-    return jsonify(status)
-
-
+    return jsonify(result)
 
 
 # DO NOT include app.run() here.
