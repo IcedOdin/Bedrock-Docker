@@ -132,10 +132,16 @@ def status():
                     # Check next line for player names, if any
                     if i > 0:
                         next_line = lines[i - 1].strip()
-                        if next_line and not next_line.startswith("["):
-                            result["players"] = [name.strip() for name in next_line.split(",")]
+                        
+                        # Only include if it's not another timestamp line
+                        if not re.match(r"^\[?\d{4}-\d{2}-\d{2}", next_line):
+                            # Players might be comma separated or line-separated
+                            potential_players = [p.strip() for p in next_line.split(",") if p.strip()]
+                            result["players"] = potential_players                        
+
                     found_players = True
                     break
+
 
     except Exception as e:
         result["error"] = f"Log read failed: {e}"
