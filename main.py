@@ -1,6 +1,7 @@
 # API Backend for Minecraft Server
 # Import section
 import os
+import json
 import zipfile
 import time
 import re
@@ -18,8 +19,8 @@ PIPE_PATH = "/bedrock/server_input"
 PID_PATH = "/bedrock/bedrock_server.pid"
 LOG_PATH = "/bedrock/logs/latest.log"
 
-UPLOAD_FOLDER_BEHAVIOR = '/bedrock/behavior_packs'
-UPLOAD_FOLDER_RESOURCE = '/bedrock/resource_packs'
+UPLOAD_FOLDER_BEHAVIOR = Path('/bedrock/behavior_packs')
+UPLOAD_FOLDER_RESOURCE = Path('/bedrock/resource_packs')
 ALLOWED_EXTENSIONS = {'zip', 'mcpack'}
 
 VALID_COMMANDS = [
@@ -58,7 +59,17 @@ def allowed_file(filename):
 def extract_pack(file_path, extract_to):
     with zipfile.ZipFile(file_path, 'r') as zip_ref:
         zip_ref.extractall(extract_to)
-        
+
+def get_level_name():
+    prop_path = Path("/bedrock/server.properties")
+    if not prop_path.exists():
+        return "Bedrock level"
+
+    with open(prop_path, 'r') as f:
+        for line in f:
+            if line.startswith("level-name"):
+                return line.strip().split("=")[1]
+    return "Bedrock level"
 
 # --- Routes ---
 @app.route('/upload/behavior-pack', methods=['POST'])
@@ -72,39 +83,45 @@ def upload_behavior_pack():
 
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        save_path = os.path.join(UPLOAD_FOLDER_BEHAVIOR, filename)
+        save_path = UPLOAD_FOLDER_BEHAVIOR / filename
         file.save(save_path)
 
-        # Extract pack to temporary folder
-        extract_folder_name = filename.rsplit('.', 1)[0]
-        extract_path = os.path.join(UPLOAD_FOLDER_BEHAVIOR, extract_folder_name)
+        # Extract pack
+        extract_path = UPLOAD_FOLDER_BEHAVIOR / filename.rsplit('.', 1)[0]
         os.makedirs(extract_path, exist_ok=True)
         extract_pack(save_path, extract_path)
         os.remove(save_path)
 
-        # Parse level-name from server.properties
-        level_name = "Bedrock level"
-        server_properties_path = Path(SETTINGS_PATH)
-        if server_properties_path.exists():
-            with open(server_properties_path) as f:
-                for line in f:
-                    if line.strip().startswith("level-name"):
-                        _, value = line.split("=", 1)
-                        level_name = value.strip()
-                        break
+        # Read manifest.json to find UUID
+        manifest_path = extract_path / "manifest.json"
+        if not manifest_path.exists():
+            return jsonify({"error": "manifest.json not found in pack"}), 400
 
-        # Copy extracted pack to world's behavior_packs directory
+        try:
+            with open(manifest_path, 'r') as f:
+                manifest = json.load(f)
+                uuid = manifest["header"]["uuid"]
+        except Exception as e:
+            return jsonify({"error": f"Failed to parse manifest.json: {str(e)}"}), 400
+
+        # Copy into world behavior_packs folder
+        level_name = get_level_name()
         world_behavior_dir = Path(f"/bedrock/worlds/{level_name}/behavior_packs")
-        world_behavior_dir.mkdir(parents=True, exist_ok=True)
-        dest_path = world_behavior_dir / extract_folder_name
-        if dest_path.exists():
-            shutil.rmtree(dest_path)
-        shutil.copytree(extract_path, dest_path)
+        os.makedirs(world_behavior_dir, exist_ok=True)
+        shutil.copytree(extract_path, world_behavior_dir / extract_path.name, dirs_exist_ok=True)
+
+        # Create permission folder and copy permissions.json
+        default_config_path = Path("/bedrock/config/default")
+        uuid_dir = default_config_path / uuid
+        os.makedirs(uuid_dir, exist_ok=True)
+
+        source_permissions = default_config_path / "permissions.json"
+        if source_permissions.exists():
+            shutil.copy(source_permissions, uuid_dir / "permissions.json")
+            
         activate_behavior_packs()
 
-        return jsonify({
-            "message": "Behavior pack uploaded, extracted, and linked to world successfully."
-        }), 200
+        return jsonify({"message": f"Pack uploaded, extracted, installed to world, and granted permission ({uuid})"}), 200
 
     return jsonify({"error": "Invalid file type"}), 400
 
@@ -119,39 +136,45 @@ def upload_resource_pack():
 
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        save_path = os.path.join(UPLOAD_FOLDER_RESOURCE, filename)
+        save_path = UPLOAD_FOLDER_RESOURCE / filename
         file.save(save_path)
 
-        # Extract pack to temporary folder
-        extract_folder_name = filename.rsplit('.', 1)[0]
-        extract_path = os.path.join(UPLOAD_FOLDER_RESOURCE, extract_folder_name)
+        # Extract pack
+        extract_path = UPLOAD_FOLDER_RESOURCE / filename.rsplit('.', 1)[0]
         os.makedirs(extract_path, exist_ok=True)
         extract_pack(save_path, extract_path)
         os.remove(save_path)
 
-        # Parse level-name from server.properties
-        level_name = "Bedrock level"
-        server_properties_path = SETTINGS_PATH
-        if server_properties_path.exists():
-            with open(server_properties_path) as f:
-                for line in f:
-                    if line.strip().startswith("level-name"):
-                        _, value = line.split("=", 1)
-                        level_name = value.strip()
-                        break
+        # Read manifest.json to find UUID
+        manifest_path = extract_path / "manifest.json"
+        if not manifest_path.exists():
+            return jsonify({"error": "manifest.json not found in pack"}), 400
 
-        # Copy extracted pack to world's resource_packs directory
-        world_resource_dir = Path(f"/bedrock/worlds/{level_name}/resource_packs")
-        world_resource_dir.mkdir(parents=True, exist_ok=True)
-        dest_path = world_resource_dir / extract_folder_name
-        if dest_path.exists():
-            shutil.rmtree(dest_path)
-        shutil.copytree(extract_path, dest_path)
-        activate_resource_packs()
+        try:
+            with open(manifest_path, 'r') as f:
+                manifest = json.load(f)
+                uuid = manifest["header"]["uuid"]
+        except Exception as e:
+            return jsonify({"error": f"Failed to parse manifest.json: {str(e)}"}), 400
 
-        return jsonify({
-            "message": "Resource pack uploaded, extracted, and linked to world successfully."
-        }), 200
+        # Copy into world behavior_packs folder
+        level_name = get_level_name()
+        world_behavior_dir = Path(f"/bedrock/worlds/{level_name}/resource_packs")
+        os.makedirs(world_resource_dir, exist_ok=True)
+        shutil.copytree(extract_path, world_resource_dir / extract_path.name, dirs_exist_ok=True)
+
+        # Create permission folder and copy permissions.json
+        default_config_path = Path("/bedrock/config/default")
+        uuid_dir = default_config_path / uuid
+        os.makedirs(uuid_dir, exist_ok=True)
+
+        source_permissions = default_config_path / "permissions.json"
+        if source_permissions.exists():
+            shutil.copy(source_permissions, uuid_dir / "permissions.json")
+            
+        activate_resource_packs()            
+
+        return jsonify({"message": f"Pack uploaded, extracted, installed to world, and granted permission ({uuid})"}), 200
 
     return jsonify({"error": "Invalid file type"}), 400
 
