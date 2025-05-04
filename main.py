@@ -29,7 +29,7 @@ VALID_COMMANDS = [
 ]
 
 # --- Utility Functions ---
-def parse_properties(SETTINGS_PATH):
+def parse_properties(path):
     props = {}
     with open(path) as f:
         for line in f:
