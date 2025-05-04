@@ -100,9 +100,6 @@ def apply_env_to_server_properties(properties_path="bedrock/server.properties"):
     with open(properties_path, "w") as f:
         f.writelines(updated_lines)
 
-# --- Load ENV ---
-
-apply_env_to_server_properties()
 
 # --- Routes ---
 @app.route('/upload/behavior-pack', methods=['POST'])

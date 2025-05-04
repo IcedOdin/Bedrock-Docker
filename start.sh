@@ -31,8 +31,9 @@ if [ ! -f "$DownloadFile" ]; then
 fi
 
 # Setup Server Resources
-
-
+echo "Loading Environment Settings ...."
+python3 -c "from main import apply_env_to_server_properties; apply_env_to_server_properties()"
+echo "server.properties updated ...."
 # Start Bedrock server
 echo "Starting Bedrock server..."
 # Keep the pipe open with a background tail that never exits
