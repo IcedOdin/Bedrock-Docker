@@ -26,7 +26,38 @@ function sendCommand() {
       document.getElementById("command-response").textContent = "Error sending command.";
       console.error(err);
     });
+ }
+
+function uploadPack(inputId, endpoint) {
+  const fileInput = document.getElementById(inputId);
+  const file = fileInput.files[0];
+  const messageBox = document.getElementById('upload-message');
+
+  if (!file) {
+    messageBox.textContent = "Please select a file.";
+    return;
   }
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  fetch(endpoint, {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.message) {
+      messageBox.textContent = data.message;
+    } else {
+      messageBox.textContent = data.error || "Upload failed.";
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    messageBox.textContent = "Upload error.";
+  });
+}
 
 // Later: Add fetch('/status') here to update live server info
 function updateStatus() {

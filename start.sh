@@ -30,6 +30,9 @@ if [ ! -f "$DownloadFile" ]; then
     chmod +x bedrock_server
 fi
 
+# Setup Server Resources
+
+
 # Start Bedrock server
 echo "Starting Bedrock server..."
 # Keep the pipe open with a background tail that never exits
@@ -41,6 +44,7 @@ echo "Creating app files......"
 mkdir -p static
 mkdir -p templates
 cd ../
+
 cp main.py /bedrock/
 cp custom.js /bedrock/static/
 cp console.html settings.html layout.html /bedrock/templates/
