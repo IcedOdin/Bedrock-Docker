@@ -19,3 +19,6 @@ services:
 
 volumes:
   bedrock_data:
+  
+env_file:
+  - .env
