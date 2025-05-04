@@ -37,6 +37,8 @@ mkdir -p static
 mkdir -p templates
 cd ../
 
+cp .env /bedrock/
+cp apply_env.py /bedrock/
 cp main.py /bedrock/
 cp custom.js /bedrock/static/
 cp console.html settings.html layout.html /bedrock/templates/
@@ -44,7 +46,7 @@ cp console.html settings.html layout.html /bedrock/templates/
 cd bedrock/
 
 echo "Loading Environment Settings ...."
-python3 -c "from main import apply_env_to_server_properties; apply_env_to_server_properties()"
+python3 /bedrock/apply_env.py
 echo "server.properties updated ...."
 # Start Bedrock server
 echo "Starting Bedrock server..."

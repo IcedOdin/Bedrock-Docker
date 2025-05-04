@@ -29,7 +29,7 @@ VALID_COMMANDS = [
 ]
 
 # --- Utility Functions ---
-def parse_properties(path):
+def parse_properties(SETTINGS_PATH):
     props = {}
     with open(path) as f:
         for line in f:
@@ -56,50 +56,6 @@ def extract_pack(file_path, extract_to):
     with zipfile.ZipFile(file_path, 'r') as zip_ref:
         zip_ref.extractall(extract_to)
         
-# --- ENV Settings ---
-def apply_env_to_server_properties(properties_path="bedrock/server.properties"):
-    settings_map = {
-        "server-name": os.getenv("SERVER_NAME"),
-        "max-players": os.getenv("MAX_PLAYERS"),
-        "level-seed": os.getenv("LEVEL_SEED"),
-        "gamemode": os.getenv("GAME_MODE"),
-        "difficulty": os.getenv("DIFFICULTY"),
-        "level-name": os.getenv("LEVEL_NAME"),
-        "allow-cheats": os.getenv("ALLOW_CHEATS"),
-        "default-player-permission-level": os.getenv("DEFAULT_PLAYER_PERMISSION_LEVEL"),
-        "online-mode": os.getenv("ONLINE_MODE"),
-        "server-port": os.getenv("SERVER_PORT"),
-    }
-
-    # Read existing properties
-    if not os.path.exists(properties_path):
-        return
-
-    with open(properties_path, "r") as f:
-        lines = f.readlines()
-
-    # Update existing or add missing keys
-    updated_lines = []
-    keys_handled = set()
-    for line in lines:
-        if "=" in line:
-            key, val = line.strip().split("=", 1)
-            if key in settings_map and settings_map[key] is not None:
-                updated_lines.append(f"{key}={settings_map[key]}\n")
-                keys_handled.add(key)
-            else:
-                updated_lines.append(line)
-        else:
-            updated_lines.append(line)
-
-    # Add new keys not already in file
-    for key, val in settings_map.items():
-        if key not in keys_handled and val is not None:
-            updated_lines.append(f"{key}={val}\n")
-
-    with open(properties_path, "w") as f:
-        f.writelines(updated_lines)
-
 
 # --- Routes ---
 @app.route('/upload/behavior-pack', methods=['POST'])

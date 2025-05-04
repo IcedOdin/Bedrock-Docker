@@ -10,6 +10,7 @@ RUN apt-get update && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Python packages
+RUN pip install --no-cache-dir python-dotenv
 RUN pip3 install --no-cache-dir flask gunicorn
 
 # Create working directory for Bedrock server
@@ -20,7 +21,9 @@ VOLUME ["/bedrock"]
 
 # Copy app
 #COPY . /app
+COPY .env /.env
 COPY main.py /main.py
+COPY apply_env.py /apply_env.py
 COPY /templates/console.html /console.html
 COPY /templates/settings.html /settings.html
 COPY /templates/layout.html /layout.html
