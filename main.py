@@ -1,7 +1,12 @@
-from flask import Flask, request, jsonify, render_template, redirect
+# API Backend for Minecraft Server
+# Import section
 import os
+import zipfile
 import time
 import re
+# From Section
+from flask import Flask, request, jsonify, render_template, redirect
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
@@ -10,12 +15,17 @@ PIPE_PATH = "/bedrock/server_input"
 PID_PATH = "/bedrock/bedrock_server.pid"
 LOG_PATH = "/bedrock/logs/latest.log"
 
+UPLOAD_FOLDER_BEHAVIOR = '/bedrock/behavior_packs'
+UPLOAD_FOLDER_RESOURCE = '/bedrock/resource_packs'
+ALLOWED_EXTENSIONS = {'zip', 'mcpack'}
+
 VALID_COMMANDS = [
     "list", "tell", "say", "kick", "ban", "ban-ip", "pardon", "pardon-ip",
     "whitelist", "op", "deop", "give", "tp", "teleport", "setworldspawn",
     "setmaxplayers", "time", "gamemode", "difficulty", "weather", "effect",
     "title", "clear", "clone", "fill", "summon", "kill", "me", "save-all",
-    "save-on", "save-off", "stop", "xp", "help"
+    "save-on", "save-off", "stop", "xp", "help", "fakeplayer", "player",
+    "./fakeplayer", "./player"
 ]
 
 # --- Utility Functions ---
@@ -39,7 +49,62 @@ def send_to_pipe(command):
     with open(PIPE_PATH, 'w') as fifo:
         fifo.write(command + '\n')
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def extract_pack(file_path, extract_to):
+    with zipfile.ZipFile(file_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_to)
+
 # --- Routes ---
+@app.route('/upload/behavior-pack', methods=['POST'])
+def upload_behavior_pack():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        save_path = os.path.join(UPLOAD_FOLDER_BEHAVIOR, filename)
+        file.save(save_path)
+
+        # Extract to folder with same name as pack (minus extension)
+        extract_path = os.path.join(UPLOAD_FOLDER_BEHAVIOR, filename.rsplit('.', 1)[0])
+        os.makedirs(extract_path, exist_ok=True)
+        extract_pack(save_path, extract_path)
+        os.remove(save_path)
+
+        return jsonify({"message": "Behavior pack uploaded and extracted successfully"}), 200
+
+    return jsonify({"error": "Invalid file type"}), 400
+
+@app.route('/upload/resource-pack', methods=['POST'])
+def upload_resource_pack():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        save_path = os.path.join(UPLOAD_FOLDER_RESOURCE, filename)
+        file.save(save_path)
+
+        # Extract to folder with same name as pack (minus extension)
+        extract_path = os.path.join(UPLOAD_FOLDER_RESOURCE, filename.rsplit('.', 1)[0])
+        os.makedirs(extract_path, exist_ok=True)
+        extract_pack(save_path, extract_path)
+        os.remove(save_path)
+
+        return jsonify({"message": "Resource pack uploaded and extracted successfully"}), 200
+
+    return jsonify({"error": "Invalid file type"}), 400
+
 @app.route("/health")
 def health():
     return jsonify(status="ok"), 200
@@ -141,7 +206,6 @@ def status():
 
                     found_players = True
                     break
-
 
     except Exception as e:
         result["error"] = f"Log read failed: {e}"

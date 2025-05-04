@@ -33,7 +33,24 @@
         <ul id="player-list" class="player-list">
           <li>Loading...</li>
         </ul>
-      </div>   
+      </div>
+      <div class="upload-section">
+        <h2>Upload Packs</h2>
+
+        <div class="upload-form">
+          <label for="behavior-pack">Behavior Pack (.zip or .mcpack)</label>
+          <input type="file" id="behavior-pack">
+          <button onclick="uploadPack('behavior-pack', '/upload/behavior-pack')">Upload Behavior Pack</button>
+        </div>
+
+        <div class="upload-form">
+          <label for="resource-pack">Resource Pack (.zip or .mcpack)</label>
+          <input type="file" id="resource-pack">
+          <button onclick="uploadPack('resource-pack', '/upload/resource-pack')">Upload Resource Pack</button>
+        </div>
+
+        <div id="upload-message" class="upload-message"></div>
+      </div>
       <div class="card p-3">
         <h4>💬 Send Command</h4>
         <form id="command-form" onsubmit="sendCommand(); return false;">
