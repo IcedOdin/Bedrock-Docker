@@ -1,0 +1,9 @@
+LEVEL_SEED=2781347229787215215
+GAMEMODE=survival
+DIFFICULTY=normal
+LEVEL_NAME=The World of Minecraft
+MAX_PLAYERS=10
+ONLINE_MODE=true
+ALLOW_CHEATS=true
+SERVER_NAME=My Custom Server
+MOTD=Welcome to the Server
