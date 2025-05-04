@@ -7,4 +7,3 @@ ONLINE_MODE=true
 ALLOW_CHEATS=true
 SERVER_NAME=My Custom Server
 MOTD=Welcome to the Server
-ENABLE_SCRIPT_API=true

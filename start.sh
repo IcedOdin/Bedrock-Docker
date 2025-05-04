@@ -37,8 +37,7 @@ mkdir -p static
 mkdir -p templates
 cd ../
 
-cp .env /bedrock/
-cp apply_env.py /bedrock/
+cp .env activate.py apply_env.py /bedrock/
 cp main.py /bedrock/
 cp custom.js /bedrock/static/
 cp console.html settings.html layout.html /bedrock/templates/

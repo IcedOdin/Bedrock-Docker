@@ -22,6 +22,7 @@ VOLUME ["/bedrock"]
 # Copy app
 #COPY . /app
 COPY env /.env
+COPY activate.py /activate.py
 COPY main.py /main.py
 COPY apply_env.py /apply_env.py
 COPY /templates/console.html /console.html

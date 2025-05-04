@@ -4,9 +4,12 @@ import os
 import zipfile
 import time
 import re
+import shutil
 # From Section
+from pathlib import Path
 from flask import Flask, request, jsonify, render_template, redirect
 from werkzeug.utils import secure_filename
+from activate import activate_behavior_packs, activate_resource_packs
 
 app = Flask(__name__)
 
@@ -72,13 +75,36 @@ def upload_behavior_pack():
         save_path = os.path.join(UPLOAD_FOLDER_BEHAVIOR, filename)
         file.save(save_path)
 
-        # Extract to folder with same name as pack (minus extension)
-        extract_path = os.path.join(UPLOAD_FOLDER_BEHAVIOR, filename.rsplit('.', 1)[0])
+        # Extract pack to temporary folder
+        extract_folder_name = filename.rsplit('.', 1)[0]
+        extract_path = os.path.join(UPLOAD_FOLDER_BEHAVIOR, extract_folder_name)
         os.makedirs(extract_path, exist_ok=True)
         extract_pack(save_path, extract_path)
         os.remove(save_path)
 
-        return jsonify({"message": "Behavior pack uploaded and extracted successfully"}), 200
+        # Parse level-name from server.properties
+        level_name = "Bedrock level"
+        server_properties_path = Path(SETTINGS_PATH)
+        if server_properties_path.exists():
+            with open(server_properties_path) as f:
+                for line in f:
+                    if line.strip().startswith("level-name"):
+                        _, value = line.split("=", 1)
+                        level_name = value.strip()
+                        break
+
+        # Copy extracted pack to world's behavior_packs directory
+        world_behavior_dir = Path(f"/bedrock/worlds/{level_name}/behavior_packs")
+        world_behavior_dir.mkdir(parents=True, exist_ok=True)
+        dest_path = world_behavior_dir / extract_folder_name
+        if dest_path.exists():
+            shutil.rmtree(dest_path)
+        shutil.copytree(extract_path, dest_path)
+        activate_behavior_packs()
+
+        return jsonify({
+            "message": "Behavior pack uploaded, extracted, and linked to world successfully."
+        }), 200
 
     return jsonify({"error": "Invalid file type"}), 400
 
@@ -96,13 +122,36 @@ def upload_resource_pack():
         save_path = os.path.join(UPLOAD_FOLDER_RESOURCE, filename)
         file.save(save_path)
 
-        # Extract to folder with same name as pack (minus extension)
-        extract_path = os.path.join(UPLOAD_FOLDER_RESOURCE, filename.rsplit('.', 1)[0])
+        # Extract pack to temporary folder
+        extract_folder_name = filename.rsplit('.', 1)[0]
+        extract_path = os.path.join(UPLOAD_FOLDER_RESOURCE, extract_folder_name)
         os.makedirs(extract_path, exist_ok=True)
         extract_pack(save_path, extract_path)
         os.remove(save_path)
 
-        return jsonify({"message": "Resource pack uploaded and extracted successfully"}), 200
+        # Parse level-name from server.properties
+        level_name = "Bedrock level"
+        server_properties_path = SETTINGS_PATH
+        if server_properties_path.exists():
+            with open(server_properties_path) as f:
+                for line in f:
+                    if line.strip().startswith("level-name"):
+                        _, value = line.split("=", 1)
+                        level_name = value.strip()
+                        break
+
+        # Copy extracted pack to world's resource_packs directory
+        world_resource_dir = Path(f"/bedrock/worlds/{level_name}/resource_packs")
+        world_resource_dir.mkdir(parents=True, exist_ok=True)
+        dest_path = world_resource_dir / extract_folder_name
+        if dest_path.exists():
+            shutil.rmtree(dest_path)
+        shutil.copytree(extract_path, dest_path)
+        activate_resource_packs()
+
+        return jsonify({
+            "message": "Resource pack uploaded, extracted, and linked to world successfully."
+        }), 200
 
     return jsonify({"error": "Invalid file type"}), 400
 
