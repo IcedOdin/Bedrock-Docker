@@ -32,7 +32,9 @@ def update_properties():
         "default-player-permission-level": "DEFAULT_PLAYER_PERMISSION_LEVEL",
         "online-mode": "ONLINE_MODE",
         "server-port": "SERVER_PORT",
-        "motd": "MOTD"
+        "motd": "MOTD",
+        "experimental-gameplay": "EXPERIMENTAL_GAMEPLAY",
+        "enable-script-api": "ENABLE_SCRIPT_API"
     }
 
     for prop_key, env_key in env_mappings.items():
