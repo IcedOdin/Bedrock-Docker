@@ -33,6 +33,7 @@ def update_properties():
         "online-mode": "ONLINE_MODE",
         "server-port": "SERVER_PORT",
         "motd": "MOTD"
+        "enable-script-api": "ENABLE_SCRIPT_API"
     }
 
     for prop_key, env_key in env_mappings.items():
