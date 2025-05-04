@@ -20,5 +20,12 @@ services:
 volumes:
   bedrock_data:
   
+environment:
+  - LEVEL_SEED=2781347229787215215
+  - LEVEL_NAME=The World of Minecraft
+  - SERVER_NAME=My Custom Server
+  - ALLOW_CHEATS=true
+  - DIFFICULTY=normal
+
 env_file:
   - .env
