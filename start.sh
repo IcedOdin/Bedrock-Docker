@@ -31,15 +31,6 @@ if [ ! -f "$DownloadFile" ]; then
 fi
 
 # Setup Server Resources
-echo "Loading Environment Settings ...."
-python3 -c "from main import apply_env_to_server_properties; apply_env_to_server_properties()"
-echo "server.properties updated ...."
-# Start Bedrock server
-echo "Starting Bedrock server..."
-# Keep the pipe open with a background tail that never exits
-tail -f "$PIPE_PATH" | ./bedrock_server > /bedrock/logs/latest.log 2>&1 &
-BEDROCK_PID=$!
-echo "$BEDROCK_PID" > /bedrock/bedrock_server.pid
 # Creating Files the Hard Way
 echo "Creating app files......"
 mkdir -p static
@@ -49,7 +40,20 @@ cd ../
 cp main.py /bedrock/
 cp custom.js /bedrock/static/
 cp console.html settings.html layout.html /bedrock/templates/
+
 cd bedrock/
+
+echo "Loading Environment Settings ...."
+python3 -c "from main import apply_env_to_server_properties; apply_env_to_server_properties()"
+echo "server.properties updated ...."
+# Start Bedrock server
+echo "Starting Bedrock server..."
+# Keep the pipe open with a background tail that never exits
+tail -f "$PIPE_PATH" | ./bedrock_server > /bedrock/logs/latest.log 2>&1 &
+BEDROCK_PID=$!
+echo "$BEDROCK_PID" > /bedrock/bedrock_server.pid
+
+
 
 # Start the Flask API with Gunicorn in the background
 echo "Starting Flask API with Gunicorn..."
