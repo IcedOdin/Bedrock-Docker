@@ -92,7 +92,7 @@ function updateStatus() {
 }
 
 // Update every 10 seconds
-setInterval(updateStatus, 10000); //update every 10seconds
+setInterval(updateStatus, 5000); //update every 10seconds
 updateStatus(); // initial call      
 
 
