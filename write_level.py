@@ -17,8 +17,10 @@ def get_level_dat_path():
 # Load the level.dat file
 file = str(get_level_dat_path())
 print (file)
-level_dat = BedrockLevelDAT.from_file(file)
-
+try:
+    level_dat = BedrockLevelDAT.from_file(file)
+except:
+    sys.exit(1)
 compound = level_dat.compound
 
 # Enable bonus chest and cheats
