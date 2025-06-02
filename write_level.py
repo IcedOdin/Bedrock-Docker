@@ -31,13 +31,10 @@ def load_settings():
     compound['cheatsEnabled'] = ByteTag(1)
     compound['keepinventory'] = ByteTag(1)
     compound['mobgriefing'] = ByteTag(0)
-    compound['permissionsLevel'] = ByteTag(0)
-    compound['playerPermissionsLevel'] = ByteTag(1)
     compound['commandsEnabled'] = ByteTag(1)
     compound['commandblockoutput'] = ByteTag(1)
     compound['commandblocksenabled'] = ByteTag(1)
     compound['sendcommandfeedback'] = ByteTag(1)
-    compound['functioncommandlimit'] = ByteTag(10000)
     
     
     # Access the experiments compound
@@ -50,7 +47,7 @@ def load_settings():
     
     
     # Save the modified level.dat
-    level_dat.save("level.dat")
+    level_dat.save(file_path)
 
 if check_path() == True:
     load_settings()
