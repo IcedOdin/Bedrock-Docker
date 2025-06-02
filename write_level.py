@@ -1,6 +1,7 @@
 from amulet.level.formats.leveldb_world.format import BedrockLevelDAT
 from amulet_nbt import ByteTag
 from pathlib import Path
+import sys
 
 WORLD_PATH = Path("/bedrock/worlds")
 
