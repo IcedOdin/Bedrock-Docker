@@ -26,25 +26,27 @@ def load_settings():
     compound = level_dat.compound
     
     # Enable bonus chest and cheats
-    compound["bonusChestEnabled"] = ByteTag(1)
-    compound["bonusChestSpawned"] = ByteTag(0)
-    compound["cheatsEnabled"] = ByteTag(1)
-    compound["permissionsLevel"] = ByteTag(0)
-    compound["playerPermissionsLevel"] = ByteTag(1)
-    compound["commandsEnabled"] = ByteTag(1)
-    compound["commandblockoutput"] = ByteTag(1)
-    compound["commandblocksenabled"] = ByteTag(1)
-    compound["sendcommandfeedback"] = ByteTag(1)
-    compound["functioncommandlimit"] = ByteTag(10000)
+    compound['bonusChestEnabled'] = ByteTag(1)
+    compound['bonusChestSpawned'] = ByteTag(0)
+    compound['cheatsEnabled'] = ByteTag(1)
+    compound['keepinventory'] = ByteTag(1)
+    compound['mobgriefing'] = ByteTag(0)
+    compound['permissionsLevel'] = ByteTag(0)
+    compound['playerPermissionsLevel'] = ByteTag(1)
+    compound['commandsEnabled'] = ByteTag(1)
+    compound['commandblockoutput'] = ByteTag(1)
+    compound['commandblocksenabled'] = ByteTag(1)
+    compound['sendcommandfeedback'] = ByteTag(1)
+    compound['functioncommandlimit'] = ByteTag(10000)
     
     
     # Access the experiments compound
-    experiments = level_dat.compound["experiments"]
+    experiments = level_dat.compound['experiments']
     
     # Modify values or add new ones
-    experiments["experiments_ever_used"] = ByteTag(1)  # Turn on gametest
-    experiments["gametest"] = ByteTag(1)  # Turn on gametest
-    experiments["saved_with_toggled_experiments"] = ByteTag(1)  # Turn on Toggeled Experiments
+    experiments['experiments_ever_used'] = ByteTag(1)  # Turn on gametest
+    experiments['gametest'] = ByteTag(1)  # Turn on gametest
+    experiments['saved_with_toggled_experiments'] = ByteTag(1)  # Turn on Toggeled Experiments
     
     
     # Save the modified level.dat
