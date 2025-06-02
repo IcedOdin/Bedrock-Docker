@@ -18,7 +18,7 @@ def get_level_dat_path():
 # Load the level.dat file
 file = str(get_level_dat_path())
 print (file)
-print (file.exists())
+print (get_level_dat_path().exists())
 
     
 level_dat = BedrockLevelDAT.from_file(file)   
