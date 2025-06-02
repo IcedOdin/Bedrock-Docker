@@ -20,8 +20,9 @@ def check_path():
     return val
 
 def load_settings():
-    # Load the level.dat file    
-    level_dat = BedrockLevelDAT.from_file(get_level_dat_path())   
+    # Load the level.dat file
+    file_path = str(get_level_dat_path())
+    level_dat = BedrockLevelDAT.from_file(file_path)   
     compound = level_dat.compound
     
     # Enable bonus chest and cheats
