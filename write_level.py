@@ -14,30 +14,37 @@ def get_level_dat_path():
                 return WORLD_PATH / level_name / "level.dat"
     raise FileNotFoundError("World path not found")
 
+def check_path():
+    print (get_level_dat_path().exists())
+    val = get_level_dat_path().exists()
+    return val
 
-# Load the level.dat file
-file = str(get_level_dat_path())
-print (file)
-print (get_level_dat_path().exists())
-
+def load_settings():
+    # Load the level.dat file    
+    level_dat = BedrockLevelDAT.from_file(get_level_dat_path())   
+    compound = level_dat.compound
     
-level_dat = BedrockLevelDAT.from_file(file)   
-compound = level_dat.compound
+    # Enable bonus chest and cheats
+    compound["bonusChestEnabled"] = ByteTag(1)
+    compound["bonusChestSpawned"] = ByteTag(1)
+    compound["cheatsEnabled"] = ByteTag(1)
+    compound["commandsEnabled"] = ByteTag(1)
+    
+    # Access the experiments compound
+    experiments = level_dat.compound["experiments"]
+    
+    # Modify values or add new ones
+    experiments["experiments_ever_used"] = ByteTag(1)  # Turn off gametest
+    experiments["gametest"] = ByteTag(1)  # Turn off gametest
+    #experiments["new_experiment"] = ByteTag(1)  # Add a new custom experiment
+    
+    
+    # Save the modified level.dat
+    level_dat.save("level.dat")
 
-# Enable bonus chest and cheats
-compound["bonusChestEnabled"] = ByteTag(1)
-compound["bonusChestSpawned"] = ByteTag(1)
-compound["cheatsEnabled"] = ByteTag(1)
-compound["commandsEnabled"] = ByteTag(1)
+if check_path() == true:
+    load_settings()
+    print ("Loading Settings ....")
+else:
+    print ("Skipping for now....")
 
-# Access the experiments compound
-experiments = level_dat.compound["experiments"]
-
-# Modify values or add new ones
-experiments["experiments_ever_used"] = ByteTag(1)  # Turn off gametest
-experiments["gametest"] = ByteTag(1)  # Turn off gametest
-#experiments["new_experiment"] = ByteTag(1)  # Add a new custom experiment
-
-
-# Save the modified level.dat
-level_dat.save("level.dat")
