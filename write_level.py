@@ -1,7 +1,7 @@
 from amulet.level.formats.leveldb_world.format import BedrockLevelDAT
 from amulet_nbt import ByteTag
 from pathlib import Path
-import sys
+
 
 WORLD_PATH = Path("/bedrock/worlds")
 
@@ -18,10 +18,10 @@ def get_level_dat_path():
 # Load the level.dat file
 file = str(get_level_dat_path())
 print (file)
-try:
-    level_dat = BedrockLevelDAT.from_file(file)
-except:
-    sys.exit(1)
+print (file.exists())
+
+    
+level_dat = BedrockLevelDAT.from_file(file)   
 compound = level_dat.compound
 
 # Enable bonus chest and cheats
