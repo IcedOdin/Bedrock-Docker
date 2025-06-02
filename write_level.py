@@ -29,6 +29,8 @@ def load_settings():
     compound["bonusChestEnabled"] = ByteTag(1)
     compound["bonusChestSpawned"] = ByteTag(0)
     compound["cheatsEnabled"] = ByteTag(1)
+    compound["permissionsLevel"] = ByteTag(0)
+    compound["playerPermissionsLevel"] = ByteTag(1)
     compound["commandsEnabled"] = ByteTag(1)
     compound["commandblockoutput"] = ByteTag(1)
     compound["commandblocksenabled"] = ByteTag(1)
