@@ -42,7 +42,7 @@ def load_settings():
     # Save the modified level.dat
     level_dat.save("level.dat")
 
-if check_path() == true:
+if check_path() == True:
     load_settings()
     print ("Loading Settings ....")
 else:
